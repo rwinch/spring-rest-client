@@ -19,20 +19,27 @@ public class RestClientTests {
 
 	public static final ParameterizedTypeReference<List<String>> STRING_LIST_TYPE = new ParameterizedTypeReference<List<String>>() { };
 
-	public void test() throws Exception {
-		// Synchronous examples ----------------------------
-		String resp1 = new RestClient()
+	// Synchronous examples ----------------------------
+
+	public void getString() throws Exception {
+		String response = new RestClient()
 				.get("http://example.com")
 				.as(String.class)
 				.execute();
+	}
 
+	public void getListString() {
 		List<String> strings = new RestClient()
 				.get("http://example.com")
 				.as(STRING_LIST_TYPE)
 				.execute();
+	}
 
-		// Ribbon examples ----------------------------
-		ResponseEntity<String> response1 = new RestClient()
+	// Ribbon examples ----------------------------
+
+	public void getResponseEntityWithRibbon() {
+
+		ResponseEntity<String> response = new RestClient()
 				.uriResolver(new RibbonUriResolver("user"))
 				.get("/users/{userid}")
 				.params(1)
@@ -40,16 +47,21 @@ public class RestClientTests {
 				.as(String.class)
 				.exchange();
 
-		response1.getStatusCode();
+		response.getStatusCode();
+	}
 
-		ResponseEntity response2 = new RestClient()
+	public void postResposneEntityWithRibbon() {
+		ResponseEntity response = new RestClient()
 				.uriResolver(new RibbonUriResolver("user"))
 				.post("/users")
 				.body(new User("myuser", "myname"))
 				.as(Void.class)
 				.exchange();
 
-		response2.getStatusCode();
+		response.getStatusCode();
+	}
+
+	public void listenableFuture() {
 
 		// Spring ListenableFuture example ----------------------------
 		ListenableFuture<String> future = new RestClient()
@@ -69,7 +81,9 @@ public class RestClientTests {
 				System.out.println(result);
 			}
 		});
+	}
 
+	public void completableFuture() throws Exception {
 		// Java CompletableFutureTarget example ----------------------------
 		CompletableFuture<String> completableFuture = new RestClient()
 				.get("http://example.com")
@@ -78,6 +92,9 @@ public class RestClientTests {
 				.execute();
 
 		System.out.println(completableFuture.get(1, TimeUnit.SECONDS));
+	}
+
+	public void observable() {
 
 		// RxJava Observable example ----------------------------
 		Observable<String> observable = new RestClient()
@@ -86,6 +103,9 @@ public class RestClientTests {
 				.execute();
 
 		observable.map(s -> s);
+	}
+
+	public void hystrix() {
 
 		// HystrixExecutable example ----------------------------
 		HystrixExecutable<String> executable = new RestClient()
