@@ -3,9 +3,15 @@ package org.springframework.reacvtive.client.mockmvcstyle;
 import lombok.Data;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
+import org.springframework.reacvtive.client.mockmvcstyle.RequestBuilder.TypedRequestBuilder;
+
 import rx.Observable;
 
 import static org.springframework.reacvtive.client.mockmvcstyle.RequestBuilders.*;
+
+import java.util.List;
+
+import org.springframework.core.ParameterizedTypeReference;
 
 /**
  * @author Spencer Gibb
@@ -15,38 +21,41 @@ public class MockMvcStyleTests {
 
 	public void getString() throws Exception {
 
-		String result = defaultRestClient.perform(
-				get("http://example.com")
-						.as(String.class)
-		).getObject();
+		TypedRequestBuilder<String> request = get("http://example.com")
+				.as(String.class);
+
+		String result = defaultRestClient.perform(request);
 	}
 
 	public void getResponseEntity() {
+		ParameterizedTypeReference<ResponseEntity<User>> type = new ParameterizedTypeReference<ResponseEntity<User>>() { };
 
-		ResponseEntity<User> response = defaultRestClient.perform(
-				get("/users/{userid}", 1)
-						.header("myheader", "myvalue")
-						.as(User.class)
-		).getResponse();
+		TypedRequestBuilder<ResponseEntity<User>> request = get("/users/{userid}", 1)
+				.header("myheader", "myvalue")
+				.as(type);
+
+		ResponseEntity<User> result = defaultRestClient.perform(request);
 	}
 
 	public void postResponseEntity() {
+		ParameterizedTypeReference<ResponseEntity<Void>> type = new ParameterizedTypeReference<ResponseEntity<Void>>() { };
 
-		ResponseEntity response = defaultRestClient.perform(
-				post("http://example.com/users")
-						.contentType(MediaType.APPLICATION_JSON)
-						.content(new User("username", "name"))
-						.as(Void.class) //this vs. two perform methods in RestClient
-		).getResponse();
+		TypedRequestBuilder<ResponseEntity<Void>> request = post("http://example.com/users")
+			.contentType(MediaType.APPLICATION_JSON)
+			.content(new User("username", "name"))
+			.as(type); //this vs. two perform methods in RestClient
+
+		ResponseEntity<Void> response = defaultRestClient.perform(request);
 	}
 
 	public void getObservable() {
+		ParameterizedTypeReference<Observable<User>> type = new ParameterizedTypeReference<Observable<User>>() { };
 
-		Observable<User> observable = new ObservableRestClient().perform(
-				get("/users/{userid}", 1)
-						.header("myheader", "myvalue")
-						.as(User.class)
-		).getObject();
+		TypedRequestBuilder<Observable<User>> request = get("/users/{userid}", 1)
+			.header("myheader", "myvalue")
+			.as(type);
+
+		Observable<User> observable = defaultRestClient.perform(request);
 	}
 
 	@Data
